@@ -1,0 +1,44 @@
+[
+  {
+    "service": "Telehealth consultation",
+    "department": "General Medicine",
+    "fee_usd": 45,
+    "availability": "Weekdays 08:00-18:00",
+    "booking": "Online portal or switchboard"
+  },
+  {
+    "service": "MRI scan",
+    "department": "Radiology",
+    "fee_usd": 620,
+    "availability": "Weekdays 07:00-21:00, Saturdays 08:00-14:00",
+    "booking": "Referral required"
+  },
+  {
+    "service": "Physiotherapy session",
+    "department": "Orthopedics",
+    "fee_usd": 85,
+    "availability": "Weekdays 08:00-17:00",
+    "booking": "Referral or self-referral"
+  },
+  {
+    "service": "Chemotherapy day unit",
+    "department": "Oncology",
+    "fee_usd": null,
+    "availability": "Weekdays 08:00-18:00",
+    "booking": "Oncology care team only"
+  },
+  {
+    "service": "Cardiac stress test",
+    "department": "Cardiology",
+    "fee_usd": 310,
+    "availability": "Tuesdays and Thursdays",
+    "booking": "Referral required"
+  },
+  {
+    "service": "Sleep study",
+    "department": "Neurology",
+    "fee_usd": 540,
+    "availability": "Overnight, Monday to Thursday",
+    "booking": "Referral required"
+  }
+]

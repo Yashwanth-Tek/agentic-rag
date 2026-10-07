@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Knowledge Agent — color previews</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#0f172a;--muted:#5b6b82;--faint:#9aa6b8;--border:#e4e9f1;--bg:#f5f7fb;--surface:#fff;
+        --ok:#2e7d5b;--ok-bg:#e6f4ee;--sans:'Manrope',system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace}
+  *{box-sizing:border-box}
+  body{margin:0;font:14px/1.5 var(--sans);color:var(--ink);background:#f1f3f7;-webkit-font-smoothing:antialiased}
+  .bar{max-width:1320px;margin:0 auto;padding:28px 24px 10px}
+  .bar h1{margin:0;font-size:22px;font-weight:800;letter-spacing:-.02em}
+  .bar p{margin:6px 0 16px;color:var(--muted);max-width:760px}
+  .swatches{display:flex;flex-wrap:wrap;gap:10px}
+  .sw{display:flex;align-items:center;gap:10px;border:1.5px solid var(--border);background:#fff;border-radius:999px;padding:7px 14px 7px 8px;font:600 13px var(--sans);cursor:pointer}
+  .sw.active{border-color:var(--ink);box-shadow:0 0 0 3px rgba(15,23,42,.08)}
+  .sw i{display:flex;border-radius:999px;overflow:hidden;width:34px;height:22px}
+  .sw i b{flex:1}
+  .stage{max-width:1320px;margin:0 auto;padding:10px 24px 30px}
+  .stage-title{display:flex;align-items:baseline;gap:12px;margin:0 0 10px}
+  .stage-title h2{margin:0;font-size:15px;font-weight:800}
+  .stage-title span{color:var(--muted);font-size:13px}
+  .gallery{max-width:1320px;margin:0 auto;padding:0 24px 60px}
+  .gallery h2{font-size:15px;font-weight:800;margin:0 0 14px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(400px,1fr));gap:18px}
+  .thumb{border:1px solid var(--border);border-radius:14px;background:#fff;padding:10px;cursor:pointer}
+  .thumb.active{outline:2px solid var(--ink);outline-offset:2px}
+  .thumb .cap{display:flex;align-items:center;justify-content:space-between;padding:2px 4px 8px;font:700 13px var(--sans)}
+  .thumb .cap span{font:500 11.5px var(--mono);color:var(--muted)}
+  .thumb .zoom{zoom:.31;pointer-events:none}
+
+  /* ───────── the app replica (tokens come from the wrapper) ───────── */
+  .theme{--shell:#0e1a2b;--shell-soft:#182840;--shell-edge:#23344f;--accent:#0474ea;--accent-deep:#0356b3;--accent-light:#e8f3ff;--primary:#024082;--blob1:rgba(4,116,234,.16);--blob2:rgba(2,64,130,.14);--canvas:#e9eef6}
+  .canvas{width:1280px;height:800px;padding:18px;border-radius:18px;background:radial-gradient(900px 600px at 8% 0%,var(--blob1),transparent 60%),radial-gradient(800px 600px at 95% 100%,var(--blob2),transparent 55%),var(--canvas)}
+  .win{height:100%;display:grid;grid-template-columns:228px minmax(0,1fr) 272px;gap:16px;border-radius:30px;background:var(--shell);padding:16px;box-shadow:0 40px 90px -50px rgba(2,32,64,.75)}
+  .side{display:flex;flex-direction:column;padding:8px 4px}
+  .brand{display:flex;align-items:center;gap:12px;padding:0 8px;margin-bottom:24px}
+  .mark{width:36px;height:36px;border-radius:10px;background:var(--accent);position:relative;flex:none}
+  .mark::after{content:"";position:absolute;inset:9px;border-radius:50%;border:2px solid #fff;border-right-color:transparent}
+  .brand b{display:block;color:#fff;font-size:15px;font-weight:800;letter-spacing:-.01em}
+  .brand small{display:block;color:rgba(255,255,255,.5);font-size:11.5px}
+  .nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;color:rgba(255,255,255,.7);font-weight:600;font-size:14px}
+  .nav a.on{background:var(--shell-soft);color:#fff}
+  .nav a svg{width:17px;height:17px}
+  .nav .count{margin-left:auto;background:var(--accent);color:#fff;border-radius:999px;padding:1px 8px;font:700 11px var(--mono)}
+  .status{margin-top:auto;border-radius:18px;padding:16px;color:#fff;background:linear-gradient(145deg,var(--accent) 0%,var(--accent-deep) 100%);box-shadow:0 16px 30px -18px var(--accent)}
+  .status b{display:block;font-size:15px;font-weight:800;letter-spacing:-.01em}
+  .status ul{list-style:none;margin:10px 0 0;padding:0;font-size:12.5px;color:rgba(255,255,255,.85)}
+  .status li{display:flex;align-items:center;gap:8px;margin:3px 0}
+  .status li::before{content:"";width:7px;height:7px;border-radius:50%;background:#6ee7b7}
+  .status code{display:block;margin-top:10px;font:400 11px var(--mono);color:rgba(255,255,255,.7)}
+  .status .btn{display:inline-block;margin-top:12px;background:#fff;color:var(--primary);border-radius:999px;padding:6px 12px;font:700 12px var(--sans)}
+  .clear{display:flex;align-items:center;gap:12px;padding:10px 12px;color:rgba(255,255,255,.7);font-weight:600;font-size:14px;margin-top:12px}
+
+  .panel{display:flex;flex-direction:column;min-height:0;background:#fff;border-radius:22px;overflow:hidden}
+  .ph{height:64px;display:flex;align-items:center;gap:10px;padding:0 24px;border-bottom:1px solid var(--border)}
+  .ph h1{margin:0;font-size:15px;font-weight:800;letter-spacing:-.01em}
+  .ph .r{margin-left:auto;display:flex;gap:8px;align-items:center}
+  .ghost{display:inline-flex;align-items:center;gap:6px;border-radius:12px;padding:8px 12px;font-weight:600;font-size:13px;color:var(--muted)}
+  .iconb{width:36px;height:36px;border:1px solid var(--border);border-radius:12px;display:inline-flex;align-items:center;justify-content:center;color:var(--muted)}
+  .body{flex:1;overflow:hidden;padding:24px 28px;display:flex;flex-direction:column;gap:16px;max-width:900px;width:100%;margin:0 auto}
+  .bubble{align-self:flex-end;max-width:85%;background:var(--accent-light);color:var(--primary);border-radius:16px 16px 6px 16px;padding:10px 16px;font-weight:600;font-size:15px}
+  .card{border:1px solid var(--border);border-radius:16px;background:#fff;box-shadow:0 1px 2px rgba(15,23,42,.04),0 10px 30px -24px rgba(2,32,64,.35);overflow:hidden}
+  .tabs{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg);border-bottom:1px solid var(--border)}
+  .tabs .set{display:flex;gap:4px;background:#eef2f8;border-radius:12px;padding:4px}
+  .tab{padding:6px 12px;border-radius:8px;font-size:13px;font-weight:600;color:var(--muted)}
+  .tab.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(15,23,42,.08)}
+  .tab small{font:600 11px var(--mono);color:var(--faint);margin-left:6px}
+  .pill{margin-left:auto;display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700;background:var(--ok-bg);color:var(--ok)}
+  .cc{padding:22px 24px;font-size:15.5px;line-height:1.72}
+  .cc p{margin:0 0 14px}
+  .cite{display:inline-flex;align-items:center;justify-content:center;min-width:19px;height:19px;padding:0 6px;margin-left:4px;border-radius:6px;background:var(--accent-light);color:var(--primary);font:700 11px var(--mono);vertical-align:2px}
+  .cc ul{margin:0 0 14px;padding-left:20px}
+  .cc li::marker{color:var(--accent)}
+  .foot{display:flex;gap:16px;font-size:12.5px;color:var(--muted);margin-top:4px}
+  .foot b{color:var(--ok);font-weight:700}
+  .pillbtn{align-self:center;border:1px solid var(--border);background:#fff;border-radius:999px;padding:8px 16px;font-weight:600;font-size:14px;box-shadow:0 6px 20px -12px rgba(2,32,64,.5)}
+  .composer-wrap{padding:12px 28px 12px;border-top:1px solid var(--border)}
+  .composer{max-width:844px;margin:0 auto;display:flex;align-items:center;gap:8px;border:1px solid var(--border);border-radius:16px;padding:8px;box-shadow:0 8px 24px -18px rgba(2,32,64,.5)}
+  .composer .att{width:40px;height:40px;border-radius:12px;background:var(--bg);display:flex;align-items:center;justify-content:center;color:var(--muted)}
+  .composer span{flex:1;color:var(--faint);font-size:15px;padding:0 8px}
+  .composer .send{width:40px;height:40px;border-radius:12px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff}
+  .fn{text-align:center;font-size:11.5px;color:var(--muted);margin:8px 0 0}
+
+  .hist{display:flex;flex-direction:column;padding:8px 0}
+  .hh{display:flex;justify-content:space-between;padding:0 8px 16px;color:#fff;font-weight:800;font-size:15px}
+  .hh span{font:400 12px var(--mono);color:rgba(255,255,255,.5)}
+  .hc{background:#fff;border-radius:14px;padding:12px;margin-bottom:8px}
+  .hc .t{display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px}
+  .hc .m{width:20px;height:20px;border-radius:6px;background:var(--accent);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:900}
+  .hc .m.live{background:var(--accent-light)}.hc .m.live::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 1.3s infinite}
+  .hc .m.dim{background:#fff;border:1px solid var(--border);color:var(--faint)}
+  .hc .q{margin:4px 0 0 28px;color:var(--muted);font-size:12px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .hclear{margin-top:auto;border:1px solid var(--shell-edge);border-radius:12px;padding:10px;text-align:center;color:rgba(255,255,255,.8);font-weight:600;font-size:13px}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.7)}}
+</style>
+</head>
+<body>
+<header class="bar">
+  <h1>Knowledge Agent — color previews</h1>
+  <p>The same screen in six palettes. Everything else (layout, type, spacing) is the app as it runs now. Click a swatch to change the large preview; the gallery below shows all six at once.</p>
+  <div class="swatches" id="swatches"></div>
+</header>
+
+<section class="stage">
+  <div class="stage-title"><h2 id="stage-name">—</h2><span id="stage-note"></span></div>
+  <div id="stage"></div>
+</section>
+
+<section class="gallery">
+  <h2>All six at a glance</h2>
+  <div class="grid" id="grid"></div>
+</section>
+
+<template id="mock">
+<div class="theme"><div class="canvas"><div class="win">
+  <aside class="side">
+    <div class="brand"><span class="mark"></span><div><b>Knowledge Agent</b><small>Grounded answers from your documents</small></div></div>
+    <nav class="nav">
+      <a class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a8 8 0 0 1-11.6 7.2L4 21l1.8-5.4A8 8 0 1 1 21 12z"/></svg>Ask</a>
+      <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14M8 7h8M8 11h8"/></svg>Knowledge Base<span class="count">7</span></a>
+      <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>System</a>
+    </nav>
+    <div class="status"><b>System ready</b><ul><li>Database</li><li>Embeddings</li><li>Claude</li></ul><code>8 calls · 90 s per question</code><span class="btn">View details ↗</span></div>
+    <div class="clear">⌫ Clear conversation</div>
+  </aside>
+
+  <main class="panel">
+    <div class="ph"><h1>Ask the knowledge base</h1><div class="r"><span class="ghost">＋ New chat</span><span class="iconb">▥</span></div></div>
+    <div class="body">
+      <div class="bubble">Which departments were above the readmission target in August 2026?</div>
+      <div class="card">
+        <div class="tabs"><div class="set"><span class="tab on">Answer</span><span class="tab">Sources<small>3</small></span><span class="tab">Activity<small>7</small></span></div><span class="pill">✓ Verified · 22.3 s</span><span class="iconb" style="width:32px;height:32px">⧉</span></div>
+        <div class="cc">
+          <p>The 30-day readmission target for every department in the third quarter of 2026 is 11.5 percent, and a department counts as above target when its monthly rate is higher than 11.5 percent.<span class="cite">1</span></p>
+          <ul>
+            <li>Cardiology, at 12.1 percent, which is above the 11.5 percent target.<span class="cite">2</span><span class="cite">1</span> The board noted that Cardiology had been above the target in both July and August and asked the department for an improvement plan.<span class="cite">3</span></li>
+            <li>Oncology, at 11.6 percent, just over the 11.5 percent target.<span class="cite">2</span><span class="cite">1</span></li>
+          </ul>
+          <p>Orthopedics (8.3 percent) and Neurology (10.4 percent) were both below the target in August 2026.<span class="cite">2</span></p>
+          <div class="foot"><span><b>✓</b> Every statement checked against 3 sources</span><span>Revised once</span></div>
+        </div>
+      </div>
+      <span class="pillbtn">↻ Ask again</span>
+    </div>
+    <div class="composer-wrap"><div class="composer"><span class="att">📎</span><span>Ask anything about your documents…</span><span class="send">➤</span></div><p class="fn">Answers come only from your knowledge base. Every statement shown has been checked against its sources.</p></div>
+  </main>
+
+  <aside class="hist">
+    <div class="hh">History<span>3/50</span></div>
+    <div class="hc"><div class="t"><span class="m live"></span>Working…</div><div class="q">How many days of annual leave do permanent employees get?</div></div>
+    <div class="hc"><div class="t"><span class="m">✓</span>Verified answer</div><div class="q">Which departments were above the readmission target in August 2026?</div></div>
+    <div class="hc"><div class="t"><span class="m dim">○</span>Not found</div><div class="q">What is the hospital's annual revenue?</div></div>
+    <div class="hclear">🗑 Clear history</div>
+  </aside>
+</div></div></div>
+</template>
+
+<script>
+const THEMES = [
+  {id:'navy',    name:'Navy & Electric Blue', note:'current', shell:'#0e1a2b', soft:'#182840', edge:'#23344f', accent:'#0474ea', deep:'#0356b3', light:'#e8f3ff', primary:'#024082', blob1:'rgba(4,116,234,.16)', blob2:'rgba(2,64,130,.14)', canvas:'#e9eef6'},
+  {id:'orange',  name:'Charcoal & Orange',    note:'like the reference', shell:'#1c1d23', soft:'#27282f', edge:'#35363f', accent:'#f2652f', deep:'#d44f1b', light:'#ffefe7', primary:'#7c2d12', blob1:'rgba(242,101,47,.20)', blob2:'rgba(255,160,110,.28)', canvas:'#f3eeea'},
+  {id:'emerald', name:'Graphite & Emerald',   note:'', shell:'#111816', soft:'#1b2420', edge:'#28332e', accent:'#10a37f', deep:'#0b7a5e', light:'#e3f6ee', primary:'#065f46', blob1:'rgba(16,163,127,.16)', blob2:'rgba(6,95,70,.12)', canvas:'#eaf0ee'},
+  {id:'violet',  name:'Ink & Violet',         note:'', shell:'#14122a', soft:'#1f1c3b', edge:'#2d284f', accent:'#7c5cff', deep:'#5b3df0', light:'#efebff', primary:'#3b2da8', blob1:'rgba(124,92,255,.18)', blob2:'rgba(59,45,168,.14)', canvas:'#eeedf7'},
+  {id:'teal',    name:'Midnight & Teal',      note:'', shell:'#0b1f24', soft:'#143037', edge:'#1f434c', accent:'#14b8a6', deep:'#0e8f82', light:'#e0f5f2', primary:'#0f5e58', blob1:'rgba(20,184,166,.16)', blob2:'rgba(15,94,88,.12)', canvas:'#e8f0f0'},
+  {id:'rose',    name:'Plum & Rose',          note:'', shell:'#22121e', soft:'#30202c', edge:'#45303f', accent:'#e0457b', deep:'#bb2d60', light:'#fde9f0', primary:'#8a1e4b', blob1:'rgba(224,69,123,.16)', blob2:'rgba(138,30,75,.12)', canvas:'#f4ecf0'},
+];
+const tpl = document.getElementById('mock');
+function build(theme){
+  const node = tpl.content.firstElementChild.cloneNode(true);
+  const s = node.style;
+  s.setProperty('--shell', theme.shell); s.setProperty('--shell-soft', theme.soft); s.setProperty('--shell-edge', theme.edge);
+  s.setProperty('--accent', theme.accent); s.setProperty('--accent-deep', theme.deep); s.setProperty('--accent-light', theme.light);
+  s.setProperty('--primary', theme.primary); s.setProperty('--blob1', theme.blob1); s.setProperty('--blob2', theme.blob2); s.setProperty('--canvas', theme.canvas);
+  return node;
+}
+const stage = document.getElementById('stage'), swatches = document.getElementById('swatches'), grid = document.getElementById('grid');
+function select(id){
+  const t = THEMES.find(x => x.id === id);
+  stage.replaceChildren(build(t));
+  document.getElementById('stage-name').textContent = t.name;
+  document.getElementById('stage-note').textContent = `${t.note ? t.note + ' · ' : ''}shell ${t.shell} · accent ${t.accent}`;
+  document.querySelectorAll('.sw').forEach(b => b.classList.toggle('active', b.dataset.id === id));
+  document.querySelectorAll('.thumb').forEach(b => b.classList.toggle('active', b.dataset.id === id));
+  history.replaceState(null, '', '#' + id);
+}
+THEMES.forEach(t => {
+  const b = document.createElement('button'); b.className = 'sw'; b.dataset.id = t.id;
+  b.innerHTML = `<i><b style="background:${t.shell}"></b><b style="background:${t.accent}"></b><b style="background:${t.light}"></b></i>${t.name}`;
+  b.onclick = () => select(t.id); swatches.appendChild(b);
+  const th = document.createElement('div'); th.className = 'thumb'; th.dataset.id = t.id;
+  th.innerHTML = `<div class="cap">${t.name}<span>${t.accent}</span></div>`;
+  const z = document.createElement('div'); z.className = 'zoom'; z.appendChild(build(t)); th.appendChild(z);
+  th.onclick = () => { select(t.id); window.scrollTo({top:0,behavior:'smooth'}); }; grid.appendChild(th);
+});
+// Scale the 1280px-wide replica to whatever width is available (large preview and thumbnails).
+function fit(){
+  stage.style.zoom = String(Math.min(1, stage.clientWidth / 1280));
+  const width = grid.querySelector('.thumb')?.clientWidth;
+  if (width) document.querySelectorAll('.thumb .zoom').forEach(z => { z.style.zoom = String((width - 20) / 1280); });
+}
+window.addEventListener('resize', fit);
+select(THEMES.some(t => t.id === location.hash.slice(1)) ? location.hash.slice(1) : 'navy');
+fit();
+</script>
+</body>
+</html>

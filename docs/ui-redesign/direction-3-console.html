@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Direction 3 — Command Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#024082; --navy-900:#021F3F; --blue:#0474EA; --blue-light:#E8F3FF; --bg:#F8FAFC; --surface:#FFFFFF; --border:#DCE6F0;
+    --ink:#0F172A; --muted:#475569; --faint:#94A3B8; --ok:#2E7D5B; --ok-bg:#E6F4EE; --warn:#B7791F; --warn-bg:#FBF1DD; --err:#B3463F; --err-bg:#F9E5E3;
+    --sans:'IBM Plex Sans',system-ui,sans-serif; --mono:'IBM Plex Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.55 var(--sans);-webkit-font-smoothing:antialiased;height:100vh;display:flex;flex-direction:column}
+  a{color:inherit;text-decoration:none}
+
+  .top{background:var(--navy);color:#fff;height:52px;display:flex;align-items:center;padding:0 20px;gap:18px;flex:none}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:-.01em}
+  .brand i{width:26px;height:26px;border-radius:7px;background:var(--blue);position:relative}
+  .brand i::after{content:"";position:absolute;inset:6px;border-radius:50%;border:2px solid #fff;border-right-color:transparent}
+  .top nav{display:flex;gap:2px;margin-left:6px}
+  .top nav a{padding:6px 11px;border-radius:7px;color:rgba(255,255,255,.75);font-weight:500;cursor:pointer}
+  .top nav a.active{background:rgba(255,255,255,.14);color:#fff}
+  .readout{margin-left:auto;display:flex;gap:18px;font:400 12px var(--mono);color:rgba(255,255,255,.75)}
+  .readout b{color:#fff;font-weight:500}
+  .readout .ok::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#4CC38A;margin-right:6px}
+
+  .split{flex:1;display:grid;grid-template-columns:minmax(0,1fr) 420px;min-height:0}
+  .transcript{display:flex;flex-direction:column;min-width:0;border-right:1px solid var(--border)}
+  .scroll{flex:1;overflow:auto;padding:28px 36px 20px}
+  .exchange{max-width:860px;margin:0 auto 34px}
+  .q{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px}
+  .q .who{width:28px;height:28px;border-radius:8px;background:var(--navy);color:#fff;font:600 11px/28px var(--mono);text-align:center;flex:none}
+  .q h2{margin:0;font-size:19px;font-weight:600;line-height:1.35;padding-top:2px}
+  .a{display:grid;grid-template-columns:28px 1fr;gap:12px}
+  .a .who{width:28px;height:28px;border-radius:8px;background:var(--blue-light);color:var(--navy);font:600 11px/28px var(--mono);text-align:center}
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .panel-h{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--border);font:500 11.5px var(--mono);color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+  .panel-h .ok{color:var(--ok)}
+  .panel-h .r{margin-left:auto;text-transform:none;letter-spacing:0}
+  .answer{padding:18px 20px 6px;font-size:15.5px;line-height:1.72}
+  .answer p{margin:0 0 14px}
+  .cite{display:inline-block;font:600 11px/18px var(--mono);color:var(--navy);background:var(--blue-light);border:1px solid #CFE3FA;border-radius:5px;padding:0 5px;margin-left:4px;vertical-align:2px}
+  .src{border-top:1px solid var(--border);padding:12px 20px 14px}
+  .src-row{display:grid;grid-template-columns:26px 1fr auto;gap:10px;align-items:start;padding:7px 0}
+  .src-row+.src-row{border-top:1px dashed var(--border)}
+  .src-row .n{font:600 11px/22px var(--mono);background:var(--navy);color:#fff;border-radius:5px;text-align:center}
+  .src-row b{font-weight:600;font-size:13.5px}
+  .src-row .loc{font:400 12px var(--mono);color:var(--muted)}
+  .src-row .ex{grid-column:2/4;font-size:13px;color:var(--muted);line-height:1.55;padding:6px 10px;border-left:2px solid var(--blue);background:var(--bg);border-radius:0 6px 6px 0}
+  .composer{flex:none;border-top:1px solid var(--border);background:var(--surface);padding:12px 36px}
+  .composer form{max-width:860px;margin:0 auto;display:flex;gap:10px;align-items:center;border:1px solid var(--border);border-radius:10px;padding:6px 6px 6px 14px;background:var(--bg)}
+  .composer form:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-light)}
+  .composer input{flex:1;border:0;background:transparent;outline:0;font:14.5px var(--sans)}
+  .composer button{border:0;background:var(--navy);color:#fff;font:600 13px var(--sans);border-radius:7px;padding:9px 14px}
+  .composer small{display:block;max-width:860px;margin:6px auto 0;font-size:11.5px;color:var(--muted)}
+
+  /* console */
+  .console{display:flex;flex-direction:column;min-height:0;background:var(--surface)}
+  .c-head{padding:14px 18px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+  .c-head h3{margin:0;font:600 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .c-head .live{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font:500 11px var(--mono);color:var(--blue)}
+  .c-head .live i{width:7px;height:7px;border-radius:50%;background:var(--blue);animation:pulse 1.3s infinite}
+  .gauges{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border)}
+  .gauge{font:400 11.5px var(--mono);color:var(--muted)}
+  .gauge b{display:block;font-size:18px;font-weight:600;color:var(--ink);line-height:1.1;margin:2px 0 6px}
+  .gauge em{display:block;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+  .gauge em i{display:block;height:100%;background:var(--blue)}
+  .log{flex:1;overflow:auto;padding:8px 0}
+  .ev{display:grid;grid-template-columns:62px 58px 1fr;gap:10px;padding:7px 18px;font-size:12.5px;align-items:start}
+  .ev:hover{background:var(--bg)}
+  .ev .t{font:400 11.5px var(--mono);color:var(--faint);padding-top:2px}
+  .ev .k{font:600 10px/18px var(--mono);letter-spacing:.06em;border-radius:4px;text-align:center;background:var(--blue-light);color:var(--navy)}
+  .ev .k.sys{background:var(--bg);color:var(--muted)}
+  .ev .k.ok{background:var(--ok-bg);color:var(--ok)}
+  .ev .k.live{background:var(--blue);color:#fff}
+  .ev .m b{font-weight:600}
+  .ev .m code{display:block;font:400 12px var(--mono);color:var(--muted);word-break:break-word}
+  .ev .m small{color:var(--faint);font-size:11.5px}
+  .ledger{border-top:1px solid var(--border);padding:12px 18px 16px}
+  .ledger h4{margin:0 0 8px;font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .ledger ul{list-style:none;margin:0;padding:0;display:grid;gap:4px;font:400 11.5px var(--mono);color:var(--muted)}
+  .ledger li{display:flex;gap:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ledger li b{color:var(--navy);font-weight:600;flex:none}
+  .ledger li.cited{color:var(--ink)}
+
+  /* knowledge base view */
+  .kb{flex:1;overflow:auto;padding:28px 36px}
+  .kb-in{max-width:1100px;margin:0 auto}
+  .kb h1{margin:0 0 6px;font-size:22px;font-weight:600}
+  .kb .sub{color:var(--muted);margin:0 0 18px}
+  .banner{display:flex;gap:10px;align-items:center;background:var(--blue-light);border:1px solid #CFE3FA;color:var(--navy);border-radius:9px;padding:10px 14px;font-weight:500;margin-bottom:14px}
+  .drop{border:1.5px dashed #B9CBE0;border-radius:10px;padding:18px;text-align:center;color:var(--muted);background:var(--surface);margin-bottom:14px}
+  table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;font-size:13.5px}
+  th{font:600 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:10px 14px;border-bottom:1px solid var(--border);background:#FBFCFE}
+  td{padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+  td .f{display:block;font:400 12px var(--mono);color:var(--muted)}
+  .mono{font:400 12.5px var(--mono);color:var(--muted)}
+  .chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:2px 9px;font:600 11px var(--sans)}
+  .chip.ok{background:var(--ok-bg);color:var(--ok)}.chip.warn{background:var(--warn-bg);color:var(--warn)}.chip.err{background:var(--err-bg);color:var(--err)}
+  .tag{font:600 10px/18px var(--mono);letter-spacing:.06em;background:var(--blue-light);color:var(--navy);border-radius:4px;padding:0 5px}
+
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.6)}}
+  @media (max-width:1000px){.split{grid-template-columns:1fr}.console{border-top:1px solid var(--border);max-height:46vh}.readout{display:none}.transcript{border-right:0}}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="brand"><i></i>Knowledge Agent</a>
+  <nav><a class="active" data-view="ask">Ask</a><a data-view="kb">Knowledge Base</a></nav>
+  <div class="readout"><span class="ok">db</span><span class="ok">embeddings</span><span class="ok">claude</span><span>model <b>claude-opus-5-5</b></span><span>limits <b>8 calls · 90 s</b></span><span>kb <b>7 docs</b></span></div>
+</header>
+
+<!-- ───────────── ASK VIEW ───────────── -->
+<div class="split" id="view-ask">
+  <section class="transcript">
+    <div class="scroll">
+      <div class="exchange">
+        <div class="q"><span class="who">Q</span><h2>Which departments were above the readmission target in August 2026?</h2></div>
+        <div class="a"><span class="who">A</span>
+          <div class="panel">
+            <div class="panel-h"><span class="ok">✓ verified</span><span>3 sources</span><span>revised once</span><span class="r">27.1 s · 3 tool calls</span></div>
+            <div class="answer">
+              <p>Cardiology and Oncology were above the readmission target in August 2026: the 30-day readmission target for the third quarter of 2026 is 11.5 percent for every department, and a department counts as above target when its monthly rate is higher than 11.5 percent, while Cardiology recorded 12.1 percent in August 2026 and Oncology recorded 11.6 percent in August 2026.<span class="cite">1</span><span class="cite">2</span></p>
+              <p>The board minutes record that Cardiology had been above the 30-day readmission target in July and August, and that the department had been asked for an improvement plan.<span class="cite">3</span></p>
+              <p>The other two departments were below the 11.5 percent target that month: Orthopedics recorded 8.3 percent in August 2026 and Neurology recorded 10.4 percent in August 2026.<span class="cite">2</span></p>
+            </div>
+            <div class="src">
+              <div class="src-row"><span class="n">1</span><div><b>lakeside-quality-targets-2026.pdf</b> <span class="tag">PDF</span></div><span class="loc">page 2</span>
+                <div class="ex">Readmission target. For the third quarter of 2026 the 30-day readmission target is 11.5 percent for every department. A department is above target when its monthly rate exceeds 11.5 percent.</div></div>
+              <div class="src-row"><span class="n">2</span><div><b>lakeside-department-metrics-q3-2026.csv</b> <span class="tag">CSV</span></div><span class="loc">rows 3–12</span></div>
+              <div class="src-row"><span class="n">3</span><div><b>lakeside-board-minutes-2026-09.txt</b> <span class="tag">TXT</span></div><span class="loc">part 1</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="exchange">
+        <div class="q"><span class="who">Q</span><h2>How many days of annual leave do permanent employees get?</h2></div>
+        <div class="a"><span class="who">A</span>
+          <div class="panel"><div class="panel-h"><span style="color:var(--blue)">● working</span><span class="r">4.8 s · 1 tool call</span></div>
+            <div class="answer" style="color:var(--muted);font-size:14px">Retrieving and validating… the answer is shown only after every sentence has been checked. Follow the console on the right.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="composer"><form onsubmit="return false"><input placeholder="Ask about your knowledge base…"><button>Ask</button></form><small>Answers come only from the knowledge base. Every statement shown has been checked against its sources.</small></div>
+  </section>
+
+  <aside class="console">
+    <div class="c-head"><h3>Agent console</h3><span class="live"><i></i>run #2 in progress</span></div>
+    <div class="gauges">
+      <div class="gauge">tool calls<b>1 <span style="font-size:12px;color:var(--faint)">/ 8</span></b><em><i style="width:12%"></i></em></div>
+      <div class="gauge">elapsed<b>4.8 s <span style="font-size:12px;color:var(--faint)">/ 90</span></b><em><i style="width:5%"></i></em></div>
+    </div>
+    <div class="log">
+      <div class="ev"><span class="t">00:00.0</span><span class="k sys">RUN</span><div class="m"><b>Question received</b><small>limits 8 calls · 90 s</small></div></div>
+      <div class="ev"><span class="t">00:00.1</span><span class="k sys">THINK</span><div class="m"><b>Understanding question</b></div></div>
+      <div class="ev"><span class="t">00:02.9</span><span class="k">SEARCH</span><div class="m"><b>Knowledge base search</b><code>"annual leave days permanent employees"</code><small>4 results → E1–E4</small></div></div>
+      <div class="ev"><span class="t">00:03.4</span><span class="k sys">THINK</span><div class="m"><b>Reviewing retrieved information</b></div></div>
+      <div class="ev"><span class="t">00:04.6</span><span class="k live">READ</span><div class="m"><b>Reading document</b><code>lakeside-benefits-summary-2026.docx · section:Leave entitlements</code></div></div>
+      <div class="ev" style="opacity:.45"><span class="t">—</span><span class="k sys">CHECK</span><div class="m"><b>Validate sources</b></div></div>
+      <div class="ev" style="opacity:.45"><span class="t">—</span><span class="k sys">ANSWER</span><div class="m"><b>Prepare answer</b></div></div>
+    </div>
+    <div class="ledger">
+      <h4>Evidence ledger · 4 items</h4>
+      <ul>
+        <li class="cited"><b>E1</b>lakeside-benefits-summary-2026.docx — Section: Benefits › Leave entitlements</li>
+        <li><b>E2</b>lakeside-benefits-summary-2026.docx — Section: Benefits › Health cover</li>
+        <li><b>E3</b>lakeside-board-minutes-2026-09.txt — Part 1</li>
+        <li><b>E4</b>lakeside-visitor-handbook.md — Section: Visiting hours</li>
+      </ul>
+    </div>
+  </aside>
+</div>
+
+<!-- ───────────── KNOWLEDGE BASE VIEW ───────────── -->
+<div class="kb" id="view-kb" hidden><div class="kb-in">
+  <h1>Knowledge base</h1><p class="sub">Documents the agent can search and read. Processing runs in the background.</p>
+  <div class="banner">ⓘ The agent can answer only from information available in this knowledge base.</div>
+  <div class="drop">Drop files here or <b style="color:var(--blue)">browse</b> · PDF, DOCX, MD, TXT, CSV, JSON · up to 100 MB</div>
+  <table>
+    <tr><th>document</th><th>type</th><th>status</th><th>sections</th><th>chunks</th><th>size</th><th>uploaded</th><th></th></tr>
+    <tr><td><b>lakeside-department-metrics-q3-2026.csv</b><span class="f">12 rows · 5 columns · rows:2-13</span></td><td><span class="tag">CSV</span></td><td><span class="chip ok">ready</span></td><td class="mono">12</td><td class="mono">2</td><td class="mono">514 B</td><td class="mono">2026-10-06 12:34</td><td class="mono">⋯</td></tr>
+    <tr><td><b>lakeside-quality-targets-2026.pdf</b><span class="f">3 pages · page:1 … page:3</span></td><td><span class="tag">PDF</span></td><td><span class="chip ok">ready</span></td><td class="mono">3</td><td class="mono">3</td><td class="mono">1.7 KB</td><td class="mono">2026-10-06 12:34</td><td class="mono">⋯</td></tr>
+    <tr><td><b>lakeside-visitor-handbook.md</b><span class="f">6 sections · Visiting hours · Parking · Accessibility · Food services · Contact</span></td><td><span class="tag">MD</span></td><td><span class="chip ok">ready</span></td><td class="mono">6</td><td class="mono">6</td><td class="mono">1.1 KB</td><td class="mono">2026-10-06 12:34</td><td class="mono">⋯</td></tr>
+    <tr><td><b>lakeside-benefits-summary-2026.docx</b><span class="f">4 sections · Leave entitlements · Health cover · Retirement</span></td><td><span class="tag">DOCX</span></td><td><span class="chip ok">ready</span></td><td class="mono">4</td><td class="mono">4</td><td class="mono">36 KB</td><td class="mono">2026-10-06 12:34</td><td class="mono">⋯</td></tr>
+    <tr><td><b>quarterly-review-draft.docx</b><span class="f">embedding…</span></td><td><span class="tag">DOCX</span></td><td><span class="chip warn">● processing</span></td><td class="mono">—</td><td class="mono">—</td><td class="mono">2.4 MB</td><td class="mono">just now</td><td class="mono">⋯</td></tr>
+    <tr><td><b>scan.pdf</b><span class="f" style="color:var(--err)">This PDF has no extractable text. Scanned (image) PDFs aren't supported.</span></td><td><span class="tag">PDF</span></td><td><span class="chip err">failed</span></td><td class="mono">—</td><td class="mono">—</td><td class="mono">812 KB</td><td class="mono">2026-10-06 12:40</td><td class="mono">⋯</td></tr>
+  </table>
+</div></div>
+<script>
+  document.querySelectorAll('[data-view]').forEach(a=>a.addEventListener('click',()=>{
+    document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x===a));
+    document.getElementById('view-ask').hidden=a.dataset.view!=='ask';
+    document.getElementById('view-kb').hidden=a.dataset.view!=='kb';
+    document.getElementById('view-ask').style.display=a.dataset.view==='ask'?'':'none';
+    document.getElementById('view-kb').style.display=a.dataset.view==='kb'?'':'none';
+  }));
+</script>
+</body>
+</html>

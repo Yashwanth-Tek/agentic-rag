@@ -1,0 +1,13 @@
+Department,Month,Admissions,30-day readmission rate (%),Patient satisfaction (out of 5)
+Cardiology,July 2026,402,12.4,4.1
+Cardiology,August 2026,415,12.1,4.2
+Cardiology,September 2026,421,11.9,4.2
+Oncology,July 2026,188,10.8,4.4
+Oncology,August 2026,193,11.6,4.3
+Oncology,September 2026,197,11.2,4.4
+Orthopedics,July 2026,276,7.9,4.5
+Orthopedics,August 2026,281,8.3,4.5
+Orthopedics,September 2026,290,8.0,4.6
+Neurology,July 2026,154,9.7,4.0
+Neurology,August 2026,160,10.4,4.1
+Neurology,September 2026,163,10.1,4.2

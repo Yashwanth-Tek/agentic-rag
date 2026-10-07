@@ -1,0 +1,41 @@
+[project]
+name = "agentic-rag-backend"
+version = "0.1.0"
+description = "Agentic RAG chatbot API: Claude decides what to retrieve, the application decides what may be said."
+requires-python = ">=3.12"
+dependencies = [
+    "anthropic>=1.10.0,<2",
+    "fastapi>=0.142",
+    "httpx>=0.28",
+    "psycopg[binary,pool]>=3.3",
+    "pydantic-settings>=2.15",
+    "pypdf>=6.19",
+    "python-docx>=1.2",
+    "python-multipart>=0.0.32",
+    "uvicorn>=0.54",
+]
+
+[tool.uv]
+package = false
+
+[dependency-groups]
+dev = [
+    "pytest>=9",
+    "ruff>=0.16",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "--import-mode=importlib -m 'not live'"
+markers = ["live: calls the real Ollama and Anthropic services (slow, costs tokens)"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E501"]  # scripted scenarios read better on one line

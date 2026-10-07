@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agentic RAG — UI directions</title>
+<style>
+  :root{--primary:#024082;--accent:#0474EA;--accent-light:#E8F3FF;--bg:#F8FAFC;--surface:#FFFFFF;--border:#DCE6F0;--text:#0F172A;--muted:#475569;
+        --ok:#2E7D5B;--warn:#B7791F;--err:#B3463F;--mono:"IBM Plex Mono",ui-monospace,Consolas,monospace}
+  *{box-sizing:border-box}
+  body{margin:0;background:#EEF2F7;color:var(--text);font:14px/1.5 "IBM Plex Sans",Inter,system-ui,-apple-system,"Segoe UI",sans-serif;padding:32px 20px 64px}
+  a{color:var(--accent);text-decoration:none}
+  h1{font-size:24px;margin:0 0 6px;color:var(--primary)}
+  .intro{color:var(--muted);max-width:860px;margin:0 0 30px}
+  .direction{max-width:1180px;margin:0 auto 52px}
+  .direction h2{font-size:18px;margin:0 0 4px}
+  .direction .lead{color:var(--muted);margin:0 0 14px;max-width:860px}
+  .verdict{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px;max-width:1180px}
+  .verdict div{background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+  .verdict b{display:block;margin-bottom:4px;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+  .verdict ul{margin:0;padding-left:18px}
+  .tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--primary);background:var(--accent-light);border-radius:999px;padding:3px 10px;margin-left:8px;vertical-align:middle}
+
+  /* browser frame */
+  .frame{background:var(--bg);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 1px 2px rgba(15,23,42,.05),0 18px 40px -20px rgba(2,64,130,.28)}
+  .chrome{height:34px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;padding:0 14px}
+  .chrome i{width:10px;height:10px;border-radius:50%;background:var(--border);display:block}
+  .chrome span{margin-left:12px;font-size:12px;color:var(--muted);font-family:var(--mono)}
+  .topbar{height:52px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:4px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;color:var(--primary);margin-right:16px}
+  .brand b{width:26px;height:26px;border-radius:7px;background:var(--primary);display:inline-block;position:relative}
+  .brand b::after{content:"";position:absolute;left:7px;top:7px;width:12px;height:12px;border-radius:50%;border:2px solid #fff;border-right-color:transparent}
+  .nav a{padding:6px 10px;border-radius:6px;color:var(--muted);font-weight:500}
+  .nav a.on{background:var(--accent-light);color:var(--primary)}
+  .health{margin-left:auto;display:flex;gap:14px;font-size:12px;color:var(--muted)}
+  .health i{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ok);margin-right:5px}
+  .health i.warn{background:var(--warn)}
+
+  /* shared pieces */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px}
+  .q{font-size:16px;font-weight:600;color:var(--text)}
+  .label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+  .divider{height:1px;background:var(--border);margin:14px 0}
+  .tl{list-style:none;margin:0;padding:0}
+  .tl li{display:flex;gap:12px;padding:5px 0;align-items:flex-start;position:relative}
+  .tl li+li::before{content:"";position:absolute;left:8px;top:-6px;height:12px;width:2px;background:var(--border)}
+  .tl i{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);background:#fff;flex:none;margin-top:1px;position:relative}
+  .tl .done i{border-color:var(--accent);background:var(--accent)}
+  .tl .done i::after{content:"";position:absolute;left:4px;top:1px;width:5px;height:9px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+  .tl .live i{border-color:var(--accent)}
+  .tl .live i::after{content:"";position:absolute;left:4px;top:4px;width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 1.4s ease-in-out infinite}
+  .tl .fail i{border-color:var(--err)}
+  .tl .fail i::after{content:"!";position:absolute;left:5px;top:-3px;color:var(--err);font-weight:700;font-size:12px}
+  .tl b{font-weight:600}
+  .tl span{display:block;color:var(--muted);font-family:var(--mono);font-size:12.5px}
+  .tl em{font-style:normal;color:var(--muted);font-size:12px;margin-left:auto;white-space:nowrap}
+  .tl div{flex:1;display:flex;flex-wrap:wrap;column-gap:10px;align-items:baseline}
+  .tl .live b{color:var(--accent)}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.7)}}
+  .answer p{margin:0 0 10px;line-height:1.65}
+  sup{color:var(--accent);font-weight:600;font-size:11px;margin-left:1px}
+  .src{list-style:none;margin:0;padding:0}
+  .src li{display:flex;gap:12px;padding:10px 0;border-top:1px solid var(--border)}
+  .src li:first-child{border-top:0}
+  .src .n{width:22px;height:22px;border-radius:6px;background:var(--accent-light);color:var(--primary);font-weight:600;font-size:12px;display:flex;align-items:center;justify-content:center;flex:none}
+  .src strong{font-weight:600}
+  .src span{color:var(--muted);font-family:var(--mono);font-size:12.5px;margin-left:8px}
+  .src q{display:block;quotes:"“" "”";color:var(--muted);margin-top:6px;padding:8px 10px;background:var(--bg);border-left:2px solid var(--accent);border-radius:0 6px 6px 0;font-size:13px}
+  .src .chev{margin-left:auto;color:var(--muted);align-self:center}
+  .composer{display:flex;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:8px 8px 8px 16px}
+  .composer:focus-within,.composer.focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-light)}
+  .composer span{flex:1;color:#94A3B8}
+  .composer b{width:36px;height:36px;border-radius:9px;background:var(--primary);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
+  .hint{font-size:12px;color:var(--muted);margin:8px 0 0;text-align:center}
+  .chip{display:inline-block;font-size:11px;font-weight:600;border-radius:999px;padding:2px 9px;line-height:1.6}
+  .chip.ok{background:#E6F4EE;color:var(--ok)}.chip.warn{background:#FBF1DD;color:var(--warn)}.chip.err{background:#F9E5E3;color:var(--err)}
+  .btn{display:inline-block;border-radius:8px;padding:7px 12px;font-weight:600;font-size:13px}
+  .btn.primary{background:var(--primary);color:#fff}.btn.ghost{border:1px solid var(--border);color:var(--primary);background:#fff}
+  .user{display:flex;justify-content:flex-end}
+  .user div{background:var(--accent-light);color:var(--primary);border-radius:12px 12px 2px 12px;padding:10px 14px;max-width:80%;font-weight:500}
+  .summary{display:flex;gap:16px;align-items:center;color:var(--muted);font-size:12.5px}
+  .summary b{color:var(--text);font-weight:600}
+  .meter{height:4px;background:var(--border);border-radius:2px;overflow:hidden;flex:1}
+  .meter i{display:block;height:100%;background:var(--accent);width:37%}
+
+  /* A: workbench */
+  .layout-a{display:grid;grid-template-columns:236px 1fr 300px;min-height:640px}
+  .rail{border-right:1px solid var(--border);background:var(--surface);padding:16px}
+  .rail .doc{display:flex;gap:8px;align-items:center;padding:7px 8px;border-radius:7px;font-size:13px}
+  .rail .doc.on{background:var(--accent-light)}
+  .rail .dot{width:8px;height:8px;border-radius:50%;background:var(--ok);flex:none}
+  .rail .dot.warn{background:var(--warn)}.rail .dot.err{background:var(--err)}
+  .center{padding:20px 24px;display:flex;flex-direction:column;gap:14px}
+  .inspector{border-left:1px solid var(--border);background:var(--surface);padding:16px}
+
+  /* B: stream */
+  .layout-b{padding:28px 20px 24px;min-height:640px}
+  .col{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+  .runcard{padding:18px 20px}
+
+  /* C: split */
+  .layout-c{display:grid;grid-template-columns:1fr 360px;min-height:620px}
+  .convo{padding:22px 26px;display:flex;flex-direction:column;gap:14px}
+  .panel{border-left:1px solid var(--border);background:var(--surface);padding:18px}
+
+  /* KB */
+  .kb{padding:24px 28px;min-height:420px}
+  .banner{display:flex;gap:10px;align-items:center;background:var(--accent-light);border:1px solid #CFE3FA;color:var(--primary);border-radius:10px;padding:10px 14px;font-weight:500;margin-bottom:16px}
+  .drop{border:1.5px dashed #B9CBE0;border-radius:12px;padding:22px;text-align:center;color:var(--muted);background:var(--surface);margin-bottom:16px}
+  table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:10px 14px;border-bottom:1px solid var(--border);background:#FBFCFE}
+  td{padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+  tr:last-child td{border-bottom:0}
+  td.mono,.mono{font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+  .sub{display:block;color:var(--muted);font-size:12px}
+  .mobile{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:1180px;margin:0 auto 52px}
+  .mobile .ph{background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:13px}
+  .mobile .ph b{display:block;color:var(--primary);margin-bottom:4px}
+  @media (max-width:900px){.layout-a,.layout-c{grid-template-columns:1fr}.rail,.inspector,.panel{border:0;border-top:1px solid var(--border)}.verdict,.mobile{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<h1>Agentic RAG — three UI directions</h1>
+<p class="intro">Light mode only. Palette: navy <span class="mono">#024082</span> for structure, electric blue
+<span class="mono">#0474EA</span> for interaction and agent activity, white / <span class="mono">#F8FAFC</span> surfaces,
+<span class="mono">#DCE6F0</span> borders. The same question, the same activity timeline and the same Answer / Sources
+separation appear in each direction; only the layout differs. Mockups are static; the live step uses the one pulsing dot
+that the real UI would animate. Nothing shown is model reasoning — every step label is generated by the application.</p>
+
+<!-- ───────────────────────────── A ───────────────────────────── -->
+<section class="direction">
+  <h2>Direction A — Workbench <span class="tag">three columns</span></h2>
+  <p class="lead">Knowledge-base rail on the left, conversation in the centre, an evidence inspector on the right. Everything is visible at once; the inspector invites the reader to verify sources.</p>
+  <div class="frame">
+    <div class="chrome"><i></i><i></i><i></i><span>127.0.0.1:5174</span></div>
+    <div class="topbar"><div class="brand"><b></b>Knowledge Agent</div><div class="nav"><a class="on">Ask</a><a>Knowledge Base</a></div><div class="health"><span><i></i>Database</span><span><i></i>Embeddings</span><span><i></i>Claude</span></div></div>
+    <div class="layout-a">
+      <aside class="rail">
+        <p class="label">Knowledge base · 4 ready</p>
+        <div class="doc on"><span class="dot"></span>riverside-department-metrics-q2-2026.csv</div>
+        <div class="doc"><span class="dot"></span>riverside-discharge-policy.pdf</div>
+        <div class="doc"><span class="dot"></span>helix-incident-response-runbook.md</div>
+        <div class="doc"><span class="dot"></span>brightwater-loan-products.json</div>
+        <div class="doc"><span class="dot warn"></span>quarterly-review.docx <span class="sub">processing</span></div>
+        <div class="doc"><span class="dot err"></span>scan.pdf <span class="sub">failed</span></div>
+        <div style="margin-top:14px"><span class="btn ghost">Upload documents</span></div>
+        <p class="hint" style="text-align:left;margin-top:14px">The agent answers only from these documents.</p>
+      </aside>
+      <main class="center">
+        <div class="user"><div>Which departments missed the June readmission target?</div></div>
+        <div class="card" style="padding:14px 16px">
+          <p class="label">Agent activity</p>
+          <ol class="tl">
+            <li class="done"><i></i><div><b>Question analyzed</b></div></li>
+            <li class="done"><i></i><div><b>Knowledge base search</b><span>"June readmission target"</span><em>3 results</em></div></li>
+            <li class="done"><i></i><div><b>Knowledge base search</b><span>"department June readmission rates"</span><em>4 results</em></div></li>
+            <li class="done"><i></i><div><b>Document read</b><span>riverside-department-metrics-q2-2026.csv · rows 12–18</span></div></li>
+            <li class="done"><i></i><div><b>Sources validated</b></div></li>
+            <li class="live"><i></i><div><b>Preparing answer</b><em>5.8 s</em></div></li>
+          </ol>
+        </div>
+        <div class="card answer" style="padding:16px 18px">
+          <p class="label">Answer</p>
+          <p>Cardiology was the only department above the June 30-day readmission target of 12.0%, at 12.6%.<sup>1 2</sup></p>
+          <p>Orthopedics (7.4%) and Oncology (10.9%) were below the target in June.<sup>1 2</sup></p>
+          <div class="divider"></div>
+          <p class="label">Sources</p>
+          <ul class="src">
+            <li><span class="n">1</span><div><strong>riverside-department-metrics-q2-2026.csv</strong><span>Rows 13–14 · 17</span></div><span class="chev">›</span></li>
+            <li><span class="n">2</span><div><strong>riverside-discharge-policy.pdf</strong><span>Page 4</span></div><span class="chev">›</span></li>
+          </ul>
+        </div>
+        <div class="composer"><span>Ask about your knowledge base…</span><b>↑</b></div>
+      </main>
+      <aside class="inspector">
+        <p class="label">Evidence</p>
+        <ul class="src">
+          <li><span class="n">1</span><div><strong>riverside-department-metrics-q2-2026.csv</strong><span>Rows 13–14</span><q>Department: Cardiology | Month: June 2026 | 30-day readmission rate (%): 12.6</q></div></li>
+          <li><span class="n">2</span><div><strong>riverside-discharge-policy.pdf</strong><span>Page 4</span><q>The hospital-wide 30-day readmission target for Q2 2026 is 12.0%.</q></div></li>
+        </ul>
+        <div class="divider"></div>
+        <p class="label">Run</p>
+        <div class="summary"><b>3 tool calls</b><span>of 8</span></div>
+        <div class="summary" style="margin-top:6px"><b>5.8 s</b><span>of 90 s</span><div class="meter"><i></i></div></div>
+      </aside>
+    </div>
+  </div>
+  <div class="verdict">
+    <div><b>Pros</b><ul><li>Everything on one screen: documents, activity, answer, evidence</li><li>Strongest "enterprise console" feel; evidence inspector encourages verification</li></ul></div>
+    <div><b>Cons</b><ul><li>Dense; much of the width is chrome rather than the answer</li><li>Three columns collapse awkwardly below ~1100 px (needs a second, tabbed layout)</li></ul></div>
+  </div>
+</section>
+
+<!-- ───────────────────────────── B ───────────────────────────── -->
+<section class="direction">
+  <h2>Direction B — Run cards in a focused stream <span class="tag">recommended</span></h2>
+  <p class="lead">One reading column. Each question becomes a run card: question → live timeline → Answer → Sources. Once a run finishes, the timeline collapses to a one-line summary that can be expanded again. The Knowledge Base is its own page.</p>
+  <div class="frame">
+    <div class="chrome"><i></i><i></i><i></i><span>127.0.0.1:5174</span></div>
+    <div class="topbar"><div class="brand"><b></b>Knowledge Agent</div><div class="nav"><a class="on">Ask</a><a>Knowledge Base</a></div><div class="health"><span><i></i>Database</span><span><i></i>Embeddings</span><span><i></i>Claude</span></div></div>
+    <div class="layout-b"><div class="col">
+
+      <div class="card runcard">
+        <p class="q">What is the escalation path for a P1 incident?</p>
+        <div class="divider"></div>
+        <div class="summary"><b>3 steps</b><span>1 source</span><span>3.1 s</span><span style="margin-left:auto">Show activity ›</span></div>
+        <div class="divider"></div>
+        <p class="label">Answer</p>
+        <div class="answer"><p>A P1 incident is escalated to the on-call incident commander within 15 minutes and to the engineering director if it is not acknowledged within 30 minutes.<sup>1</sup></p></div>
+        <p class="label" style="margin-top:12px">Sources</p>
+        <ul class="src"><li><span class="n">1</span><div><strong>helix-incident-response-runbook.md</strong><span>Section: Severity levels › P1</span></div><span class="chev">›</span></li></ul>
+      </div>
+
+      <div class="card runcard">
+        <p class="q">Which departments missed the June readmission target?</p>
+        <div class="divider"></div>
+        <ol class="tl">
+          <li class="done"><i></i><div><b>Question analyzed</b></div></li>
+          <li class="done"><i></i><div><b>Knowledge base search</b><span>"June readmission target"</span><em>3 results</em></div></li>
+          <li class="done"><i></i><div><b>Knowledge base search</b><span>"department June readmission rates"</span><em>4 results</em></div></li>
+          <li class="done"><i></i><div><b>Document read</b><span>riverside-department-metrics-q2-2026.csv · rows 12–18</span></div></li>
+          <li class="done"><i></i><div><b>Sources validated</b></div></li>
+          <li class="live"><i></i><div><b>Preparing answer</b><em>5.8 s · 3 of 8 calls</em></div></li>
+        </ol>
+      </div>
+
+      <div>
+        <div class="composer focus"><span>Ask about your knowledge base…</span><b>↑</b></div>
+        <p class="hint">The agent answers only from documents in your knowledge base.</p>
+      </div>
+    </div></div>
+  </div>
+  <div class="verdict">
+    <div><b>Pros</b><ul><li>Simplest and most readable; one layout from phone to desktop</li><li>Activity stays attached to the question it belongs to (auditable history)</li><li>Mirrors the "searching → reading → answer" pattern users know from AI search products</li></ul></div>
+    <div><b>Cons</b><ul><li>Evidence excerpts live inside the card rather than in a dedicated inspector</li><li>Knowledge base is a separate page (one click away)</li></ul></div>
+  </div>
+</section>
+
+<!-- ───────────────────────────── C ───────────────────────────── -->
+<section class="direction">
+  <h2>Direction C — Split console <span class="tag">conversation + activity panel</span></h2>
+  <p class="lead">The conversation on the left; a persistent agent-activity panel on the right that shows the current run, its sources and how much of the limits it used.</p>
+  <div class="frame">
+    <div class="chrome"><i></i><i></i><i></i><span>127.0.0.1:5174</span></div>
+    <div class="topbar"><div class="brand"><b></b>Knowledge Agent</div><div class="nav"><a class="on">Ask</a><a>Knowledge Base</a></div><div class="health"><span><i></i>Database</span><span><i></i>Embeddings</span><span><i></i>Claude</span></div></div>
+    <div class="layout-c">
+      <main class="convo">
+        <div class="user"><div>Which departments missed the June readmission target?</div></div>
+        <div class="card answer" style="padding:16px 18px">
+          <p class="label">Answer</p>
+          <p>Cardiology was the only department above the June 30-day readmission target of 12.0%, at 12.6%.<sup>1 2</sup></p>
+          <p>Orthopedics (7.4%) and Oncology (10.9%) were below the target in June.<sup>1 2</sup></p>
+          <div class="divider"></div>
+          <p class="label">Sources</p>
+          <ul class="src">
+            <li><span class="n">1</span><div><strong>riverside-department-metrics-q2-2026.csv</strong><span>Rows 13–14 · 17</span><q>Department: Cardiology | Month: June 2026 | 30-day readmission rate (%): 12.6</q></div></li>
+            <li><span class="n">2</span><div><strong>riverside-discharge-policy.pdf</strong><span>Page 4</span></div><span class="chev">›</span></li>
+          </ul>
+        </div>
+        <div style="margin-top:auto"><div class="composer"><span>Ask about your knowledge base…</span><b>↑</b></div><p class="hint">The agent answers only from documents in your knowledge base.</p></div>
+      </main>
+      <aside class="panel">
+        <p class="label">Agent activity</p>
+        <ol class="tl">
+          <li class="done"><i></i><div><b>Question analyzed</b></div></li>
+          <li class="done"><i></i><div><b>Knowledge base search</b><span>"June readmission target"</span></div></li>
+          <li class="done"><i></i><div><b>Knowledge base search</b><span>"department June readmission rates"</span></div></li>
+          <li class="fail"><i></i><div><b>Document read</b><span>metrics.csv · rows 40–48</span><em>out of range</em></div></li>
+          <li class="done"><i></i><div><b>Document read</b><span>metrics.csv · rows 12–18</span></div></li>
+          <li class="done"><i></i><div><b>Sources validated</b></div></li>
+          <li class="done"><i></i><div><b>Answer ready</b></div></li>
+        </ol>
+        <div class="divider"></div>
+        <p class="label">Run</p>
+        <div class="summary"><b>4 tool calls</b><span>of 8</span><div class="meter"><i style="width:50%"></i></div></div>
+        <div class="summary" style="margin-top:8px"><b>6.2 s</b><span>of 90 s</span><div class="meter"><i style="width:7%"></i></div></div>
+        <div class="summary" style="margin-top:8px"><b>1 attempt</b><span>all sentences verified</span></div>
+      </aside>
+    </div>
+  </div>
+  <div class="verdict">
+    <div><b>Pros</b><ul><li>The agent is always visible working beside the conversation; good for demos</li><li>Natural place to show limits, failed steps and retries</li></ul></div>
+    <div><b>Cons</b><ul><li>Panel shows the current run only; earlier questions lose their activity trail</li><li>On phones the panel becomes a bottom sheet that competes with the answer</li></ul></div>
+  </div>
+</section>
+
+<!-- ───────────────────────────── KB ───────────────────────────── -->
+<section class="direction">
+  <h2>Knowledge Base page <span class="tag">shared by all directions</span></h2>
+  <p class="lead">Upload area, document table with processing state, and the standing reminder that the agent only answers from what is here.</p>
+  <div class="frame">
+    <div class="chrome"><i></i><i></i><i></i><span>127.0.0.1:5174/knowledge-base</span></div>
+    <div class="topbar"><div class="brand"><b></b>Knowledge Agent</div><div class="nav"><a>Ask</a><a class="on">Knowledge Base</a></div><div class="health"><span><i></i>Database</span><span><i></i>Embeddings</span><span><i></i>Claude</span></div></div>
+    <div class="kb">
+      <div class="banner">ⓘ&nbsp; The agent can answer only from information available in this knowledge base.</div>
+      <div class="drop">Drop files here or <a>browse</a> · PDF, DOCX, MD, TXT, CSV, JSON · up to 100 MB</div>
+      <table>
+        <tr><th>Document</th><th>Type</th><th>Status</th><th>Sections</th><th>Chunks</th><th>Uploaded</th><th></th></tr>
+        <tr><td><strong>riverside-department-metrics-q2-2026.csv</strong><span class="sub">12 rows · 7 columns</span></td><td class="mono">csv</td><td><span class="chip ok">Ready</span></td><td class="mono">12</td><td class="mono">2</td><td class="mono">today 09:12</td><td class="mono">⋯</td></tr>
+        <tr><td><strong>riverside-discharge-policy.pdf</strong><span class="sub">6 pages</span></td><td class="mono">pdf</td><td><span class="chip ok">Ready</span></td><td class="mono">6</td><td class="mono">9</td><td class="mono">today 09:10</td><td class="mono">⋯</td></tr>
+        <tr><td><strong>helix-incident-response-runbook.md</strong><span class="sub">14 sections</span></td><td class="mono">md</td><td><span class="chip ok">Ready</span></td><td class="mono">14</td><td class="mono">11</td><td class="mono">yesterday</td><td class="mono">⋯</td></tr>
+        <tr><td><strong>quarterly-review.docx</strong><span class="sub">extracting…</span></td><td class="mono">docx</td><td><span class="chip warn">Processing</span></td><td class="mono">—</td><td class="mono">—</td><td class="mono">just now</td><td class="mono">⋯</td></tr>
+        <tr><td><strong>scan.pdf</strong><span class="sub">This PDF has no extractable text. Scanned (image) PDFs aren't supported.</span></td><td class="mono">pdf</td><td><span class="chip err">Failed</span></td><td class="mono">—</td><td class="mono">—</td><td class="mono">yesterday</td><td class="mono">⋯</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="mobile">
+  <div class="ph"><b>Phone, direction A</b>Rail and inspector become tabs ("Documents · Chat · Evidence"); the conversation is the default tab.</div>
+  <div class="ph"><b>Phone, direction B</b>Same layout, full-width cards; the timeline collapses to its summary line once a run finishes.</div>
+  <div class="ph"><b>Phone, direction C</b>The activity panel becomes a bottom sheet pinned above the composer while a run is live.</div>
+</section>
+
+</body>
+</html>

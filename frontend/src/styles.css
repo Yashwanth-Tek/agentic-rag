@@ -1,0 +1,136 @@
+@import 'tailwindcss';
+
+/* Design tokens. Dark navy shell around a white content panel; electric blue for interaction
+   and agent activity. The accent is one token: change --color-accent (and -deep / -light) to
+   re-skin the app. Light content only. */
+@theme {
+  --font-sans: 'Manrope', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
+
+  /* Palette: Charcoal & Orange (chosen 2026-10-07). */
+  --color-primary: #7c2d12;
+  --color-accent: #f2652f;
+  --color-accent-deep: #d44f1b;
+  --color-accent-light: #ffefe7;
+
+  --color-canvas: #f3eeea;
+  --color-shell: #1c1d23;
+  --color-shell-soft: #27282f;
+  --color-shell-edge: #35363f;
+  --color-surface: #ffffff;
+  --color-bg: #f5f7fb;
+  --color-border: #e4e9f1;
+  --color-ink: #0f172a;
+  --color-muted: #5b6b82;
+  --color-faint: #9aa6b8;
+
+  --color-ok: #2e7d5b;
+  --color-ok-bg: #e6f4ee;
+  --color-warn: #b7791f;
+  --color-warn-bg: #fbf1dd;
+  --color-err: #b3463f;
+  --color-err-bg: #f9e5e3;
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --animate-fade-in: fade-in 220ms var(--ease-out-soft) both;
+  --animate-pulse-dot: pulse-dot 1.4s ease-in-out infinite;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes pulse-dot {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.35;
+      transform: scale(0.7);
+    }
+  }
+}
+
+@layer base {
+  html {
+    color-scheme: light only;
+  }
+  body {
+    @apply font-sans text-ink antialiased;
+    background:
+      radial-gradient(900px 600px at 8% 0%, rgb(242 101 47 / 0.2), transparent 60%),
+      radial-gradient(800px 600px at 95% 100%, rgb(255 160 110 / 0.28), transparent 55%),
+      var(--color-canvas);
+    background-attachment: fixed;
+  }
+  ::selection {
+    @apply bg-accent-light text-primary;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-border bg-surface shadow-[0_1px_2px_rgb(15_23_42/0.04),0_10px_30px_-24px_rgb(2_32_64/0.35)];
+  }
+  .label {
+    @apply text-[11px] font-bold tracking-[0.08em] text-muted uppercase;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-3.5 py-2 text-sm font-semibold transition duration-150 outline-none select-none focus-visible:ring-[3px] focus-visible:ring-accent-light disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply bg-accent text-white hover:bg-accent-deep;
+  }
+  .btn-secondary {
+    @apply border border-border bg-surface text-primary hover:bg-accent-light;
+  }
+  .btn-ghost {
+    @apply text-muted hover:bg-bg hover:text-primary;
+  }
+  .btn-pill {
+    @apply rounded-full border border-border bg-surface px-4 py-2 text-sm font-semibold text-ink shadow-[0_6px_20px_-12px_rgb(2_32_64/0.5)] hover:bg-bg;
+  }
+  .icon-btn {
+    @apply inline-flex size-9 items-center justify-center rounded-xl border border-border bg-surface text-muted transition duration-150 outline-none hover:bg-bg hover:text-primary focus-visible:ring-[3px] focus-visible:ring-accent-light disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .nav-item {
+    @apply flex items-center gap-3 rounded-xl px-3 py-2.5 text-[14px] font-semibold text-white/70 transition duration-150 hover:bg-shell-soft hover:text-white;
+  }
+  .nav-item.active {
+    @apply bg-shell-soft text-white;
+  }
+  .tab {
+    @apply rounded-lg px-3 py-1.5 text-[13px] font-semibold text-muted transition duration-150 outline-none hover:text-primary focus-visible:ring-[3px] focus-visible:ring-accent-light disabled:cursor-default disabled:opacity-40;
+  }
+  .tab.active {
+    @apply bg-surface text-ink shadow-[0_1px_2px_rgb(15_23_42/0.08)];
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-bold;
+  }
+  .mono {
+    @apply font-mono text-[12.5px];
+  }
+  .cite {
+    @apply ml-1 inline-flex h-[19px] min-w-[19px] items-center justify-center rounded-md bg-accent-light px-1.5 align-[2px] font-mono text-[11px] font-bold text-primary select-none;
+  }
+  .type-badge {
+    @apply inline-flex items-center rounded-md bg-accent-light px-1.5 font-mono text-[10px] font-bold tracking-[0.06em] text-primary;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

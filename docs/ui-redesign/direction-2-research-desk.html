@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Direction 2 — Research Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#024082; --blue:#0474EA; --blue-light:#E8F3FF; --bg:#F8FAFC; --surface:#FFFFFF; --border:#DCE6F0;
+    --ink:#0F172A; --muted:#475569; --faint:#94A3B8; --ok:#2E7D5B; --ok-bg:#E6F4EE; --warn:#B7791F; --warn-bg:#FBF1DD; --err:#B3463F; --err-bg:#F9E5E3;
+    --serif:'Fraunces',Georgia,serif; --sans:'Inter',system-ui,sans-serif; --mono:'IBM Plex Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15.5px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+
+  header.top{position:sticky;top:0;z-index:5;background:rgba(248,250,252,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--border)}
+  .top-in{max-width:1180px;margin:0 auto;padding:0 32px;height:60px;display:flex;align-items:center;gap:28px}
+  .brand{display:flex;align-items:center;gap:10px;font:600 17px var(--serif);color:var(--navy)}
+  .brand i{width:28px;height:28px;border-radius:8px;background:var(--navy);position:relative;display:inline-block}
+  .brand i::after{content:"";position:absolute;inset:7px;border-radius:50%;border:2px solid #fff;border-right-color:transparent}
+  nav{display:flex;gap:4px}
+  nav a{padding:7px 12px;border-radius:999px;font-weight:500;color:var(--muted);font-size:14px;cursor:pointer}
+  nav a.active{background:var(--navy);color:#fff}
+  .status{margin-left:auto;display:flex;gap:16px;font-size:12.5px;color:var(--muted)}
+  .status span::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ok);margin-right:6px}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:40px 32px 100px}
+  .hero{max-width:720px;margin-bottom:26px}
+  .kicker{font-size:11.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)}
+  .hero h1{font:500 40px/1.15 var(--serif);letter-spacing:-.015em;color:var(--navy);margin:10px 0 12px}
+  .hero p{margin:0;color:var(--muted);font-size:16px}
+  .ask{max-width:860px;margin:22px 0 48px;display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:10px 10px 10px 20px;box-shadow:0 1px 2px rgba(2,32,64,.05),0 16px 40px -28px rgba(2,32,64,.5)}
+  .ask:focus-within{border-color:var(--blue);box-shadow:0 0 0 4px var(--blue-light)}
+  .ask input{flex:1;border:0;outline:0;background:transparent;font:500 19px var(--serif);color:var(--ink)}
+  .ask input::placeholder{color:var(--faint);font-weight:500}
+  .ask button{border:0;background:var(--navy);color:#fff;font:600 14px var(--sans);border-radius:11px;padding:12px 18px;cursor:pointer}
+  .ask small{position:absolute}
+
+  /* run = question article with sidenotes */
+  .run{display:grid;grid-template-columns:minmax(0,720px) 300px;gap:48px;padding:38px 0 42px;border-top:1px solid var(--border)}
+  .run:first-of-type{border-top:0;padding-top:0}
+  .article h2{font:500 30px/1.2 var(--serif);letter-spacing:-.015em;margin:0 0 14px;color:var(--ink)}
+  .meta{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:22px}
+  .meta b{color:var(--ok);font-weight:600}
+  .meta b.live{color:var(--blue)}
+
+  /* process strip */
+  .strip{display:flex;flex-wrap:wrap;align-items:center;gap:6px 0;margin:0 0 28px;padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:12px}
+  .step{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink);padding:5px 10px 5px 7px;border-radius:999px;background:var(--bg);white-space:nowrap}
+  .step i{width:16px;height:16px;border-radius:50%;background:var(--blue);position:relative;flex:none}
+  .step i::after{content:"";position:absolute;left:5px;top:2px;width:4px;height:8px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+  .step code{font:400 12px var(--mono);color:var(--muted);max-width:220px;overflow:hidden;text-overflow:ellipsis}
+  .step.live{background:var(--blue-light);color:var(--navy);font-weight:600}
+  .step.live i{background:var(--surface);border:2px solid var(--blue)}
+  .step.live i::after{border:0;transform:none;width:5px;height:5px;border-radius:50%;background:var(--blue);left:3.5px;top:3.5px;animation:pulse 1.3s infinite}
+  .step.todo{color:var(--faint)}.step.todo i{background:var(--border)}.step.todo i::after{display:none}
+  .arrow{color:var(--faint);padding:0 6px;font-size:12px}
+
+  .answer{font-size:17px;line-height:1.78}
+  .answer p{margin:0 0 18px}
+  .answer p::first-letter{}
+  .ref{display:inline-block;font:600 11px/1 var(--mono);color:var(--navy);background:var(--blue-light);border-radius:5px;padding:4px 5px;margin-left:4px;vertical-align:4px}
+  .verdict{display:inline-flex;align-items:center;gap:8px;margin-top:6px;padding:8px 12px;border-radius:10px;background:var(--ok-bg);color:var(--ok);font-size:13px;font-weight:600}
+
+  .notes{padding-top:6px}
+  .notes h3{margin:0 0 14px;font:500 13px var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .note{display:grid;grid-template-columns:24px 1fr;gap:10px;padding:12px 0;border-top:1px solid var(--border)}
+  .note:first-of-type{border-top:0}
+  .note .n{font:600 12px/24px var(--mono);color:#fff;background:var(--navy);border-radius:6px;text-align:center;height:24px}
+  .note b{display:block;font-size:13.5px;font-weight:600;line-height:1.35}
+  .note .loc{display:inline-block;margin-top:4px;font:400 12px var(--mono);color:var(--muted)}
+  .note q{display:block;quotes:"“" "”";margin-top:8px;font:500 14px/1.55 var(--serif);color:var(--muted)}
+  .note .tag{display:inline-block;margin-left:6px;font:500 10px/16px var(--mono);letter-spacing:.06em;padding:0 5px;border-radius:4px;background:var(--bg);border:1px solid var(--border);color:var(--muted);vertical-align:1px}
+
+  .trace-mini{margin-top:26px;padding:14px 16px;border:1px solid var(--border);border-radius:12px;background:var(--surface);font-size:12.5px;color:var(--muted)}
+  .trace-mini b{color:var(--ink)}
+  .trace-mini .bar{height:4px;border-radius:2px;background:var(--border);margin:6px 0 10px;overflow:hidden}.trace-mini .bar i{display:block;height:100%;background:var(--blue)}
+
+  /* knowledge base view */
+  .kb-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:22px}
+  .kb-head h1{font:500 40px/1.1 var(--serif);color:var(--navy);margin:8px 0 0}
+  .btn{border:1px solid var(--border);background:var(--surface);color:var(--navy);font:600 14px var(--sans);padding:10px 16px;border-radius:11px;cursor:pointer}
+  .btn.primary{background:var(--navy);border-color:var(--navy);color:#fff}
+  .banner{display:flex;gap:10px;align-items:center;background:var(--blue-light);border:1px solid #CFE3FA;color:var(--navy);border-radius:12px;padding:12px 16px;font-weight:500;margin-bottom:18px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 18px 16px;display:flex;flex-direction:column;gap:10px;min-height:150px}
+  .card .type{font:500 10.5px/18px var(--mono);letter-spacing:.08em;color:var(--navy);background:var(--blue-light);border-radius:5px;padding:0 6px;align-self:flex-start}
+  .card h4{margin:0;font:500 18px/1.3 var(--serif);word-break:break-word}
+  .card .facts{font-size:13px;color:var(--muted)}
+  .card .foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;font:400 12px var(--mono);color:var(--muted)}
+  .chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font:600 11.5px var(--sans)}
+  .chip.ok{background:var(--ok-bg);color:var(--ok)}.chip.warn{background:var(--warn-bg);color:var(--warn)}.chip.err{background:var(--err-bg);color:var(--err)}
+  .card.drop{border-style:dashed;align-items:center;justify-content:center;text-align:center;color:var(--muted);background:transparent}
+  .card.drop b{font:500 18px var(--serif);color:var(--navy)}
+
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.6)}}
+  @media (max-width:1040px){.run{grid-template-columns:1fr;gap:26px}.notes{border-top:1px solid var(--border);padding-top:18px}}
+  @media (max-width:640px){.wrap{padding:24px 16px 80px}.hero h1,.article h2{font-size:26px}.status{display:none}.answer{font-size:16px}}
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <a class="brand"><i></i>Knowledge Agent</a>
+  <nav><a class="active" data-view="ask">Ask</a><a data-view="kb">Knowledge Base · 7</a></nav>
+  <div class="status"><span>Database</span><span>Embeddings</span><span>Claude</span></div>
+</div></header>
+
+<!-- ───────────── ASK VIEW ───────────── -->
+<main class="wrap" id="view-ask">
+  <div class="hero">
+    <div class="kicker">Research desk · Lakeside Health Partners</div>
+    <h1>Ask your documents a question.</h1>
+    <p>The agent decides what to search and read, shows its work, and answers only with statements it can trace to a page, a row or a section.</p>
+  </div>
+  <form class="ask" onsubmit="return false"><input placeholder="What would you like to know?"><button>Ask</button></form>
+
+  <section class="run">
+    <div class="article">
+      <h2>Which departments were above the readmission target in August 2026?</h2>
+      <div class="meta"><span><b>✓ Verified</b></span><span>3 tool calls</span><span>27.1 seconds</span><span>3 sources</span><span>Revised once</span></div>
+      <div class="strip">
+        <span class="step"><i></i>Analyzed</span><span class="arrow">→</span>
+        <span class="step"><i></i>Search <code>readmission rate by department August 2026</code></span><span class="arrow">→</span>
+        <span class="step"><i></i>Search <code>readmission target</code></span><span class="arrow">→</span>
+        <span class="step"><i></i>Listed 7 documents</span><span class="arrow">→</span>
+        <span class="step"><i></i>Reviewed</span><span class="arrow">→</span>
+        <span class="step"><i></i>Validated</span><span class="arrow">→</span>
+        <span class="step"><i></i>Answer</span>
+      </div>
+      <div class="answer">
+        <p>Cardiology and Oncology were above the readmission target in August 2026: the 30-day readmission target for the third quarter of 2026 is 11.5 percent for every department, and a department counts as above target when its monthly rate is higher than 11.5 percent, while Cardiology recorded 12.1 percent in August 2026 and Oncology recorded 11.6 percent in August 2026.<span class="ref">1</span><span class="ref">2</span></p>
+        <p>The board minutes record that Cardiology had been above the 30-day readmission target in July and August, and that the department had been asked for an improvement plan.<span class="ref">3</span></p>
+        <p>The other two departments were below the 11.5 percent target that month: Orthopedics recorded 8.3 percent in August 2026 and Neurology recorded 10.4 percent in August 2026.<span class="ref">2</span></p>
+      </div>
+      <div class="verdict">✓ Every sentence above was checked against the passages it cites.</div>
+    </div>
+    <aside class="notes">
+      <h3>Sources</h3>
+      <div class="note"><span class="n">1</span><div><b>lakeside-quality-targets-2026.pdf<span class="tag">PDF</span></b><span class="loc">Page 2</span><q>Readmission target. For the third quarter of 2026 the 30-day readmission target is 11.5 percent for every department. A department is above target when its monthly rate exceeds 11.5 percent.</q></div></div>
+      <div class="note"><span class="n">2</span><div><b>lakeside-department-metrics-q3-2026.csv<span class="tag">CSV</span></b><span class="loc">Rows 3–12</span><q>Department: Cardiology | Month: August 2026 | 30-day readmission rate (%): 12.1 … Department: Oncology | Month: August 2026 | 30-day readmission rate (%): 11.6 …</q></div></div>
+      <div class="note"><span class="n">3</span><div><b>lakeside-board-minutes-2026-09.txt<span class="tag">TXT</span></b><span class="loc">Part 1</span><q>The board noted that Cardiology had been above the 30-day readmission target in July and August and that an improvement plan had been requested from the department.</q></div></div>
+      <div class="trace-mini"><b>Run limits</b><div class="bar"><i style="width:37%"></i></div>Tool calls 3 of 8<div class="bar"><i style="width:30%"></i></div>Time 27.1 s of 90 s</div>
+    </aside>
+  </section>
+
+  <section class="run">
+    <div class="article">
+      <h2>How many days of annual leave do permanent employees get?</h2>
+      <div class="meta"><span><b class="live">● Working</b></span><span>1 tool call</span><span>4.8 seconds</span></div>
+      <div class="strip">
+        <span class="step"><i></i>Analyzed</span><span class="arrow">→</span>
+        <span class="step"><i></i>Search <code>annual leave days permanent employees</code></span><span class="arrow">→</span>
+        <span class="step live"><i></i>Reading <code>benefits-summary-2026.docx · Leave entitlements</code></span><span class="arrow">→</span>
+        <span class="step todo"><i></i>Validate</span><span class="arrow">→</span>
+        <span class="step todo"><i></i>Answer</span>
+      </div>
+      <p style="color:var(--muted);font-style:italic;margin:0">The answer appears here once every sentence has been validated against its sources.</p>
+      <p style="margin-top:14px"><button class="btn">■ Stop</button></p>
+    </div>
+    <aside class="notes"><h3>Sources</h3><p style="color:var(--faint);font-size:13.5px;margin:0">Collected as the agent reads.</p></aside>
+  </section>
+</main>
+
+<!-- ───────────── KNOWLEDGE BASE VIEW ───────────── -->
+<main class="wrap" id="view-kb" hidden>
+  <div class="kb-head"><div><div class="kicker">Knowledge base</div><h1>Documents</h1></div><button class="btn primary">Upload documents</button></div>
+  <div class="banner">ⓘ The agent can answer only from information available in this knowledge base.</div>
+  <div class="cards">
+    <div class="card drop"><b>Drop files here</b><span>PDF · DOCX · MD · TXT · CSV · JSON · up to 100 MB</span></div>
+    <div class="card"><span class="type">PDF</span><h4>lakeside-quality-targets-2026.pdf</h4><div class="facts">3 pages · 3 chunks · readable by page</div><div class="foot"><span class="chip ok">Ready</span><span>1.7 KB · Oct 6</span></div></div>
+    <div class="card"><span class="type">CSV</span><h4>lakeside-department-metrics-q3-2026.csv</h4><div class="facts">12 rows · 5 columns · Department, Month, Admissions, 30-day readmission rate, Patient satisfaction</div><div class="foot"><span class="chip ok">Ready</span><span>514 B · Oct 6</span></div></div>
+    <div class="card"><span class="type">MD</span><h4>lakeside-visitor-handbook.md</h4><div class="facts">6 sections · Visiting hours, Parking, Accessibility, Food services, Contact</div><div class="foot"><span class="chip ok">Ready</span><span>1.1 KB · Oct 6</span></div></div>
+    <div class="card"><span class="type">DOCX</span><h4>lakeside-benefits-summary-2026.docx</h4><div class="facts">4 sections · Leave entitlements, Health cover, Retirement</div><div class="foot"><span class="chip ok">Ready</span><span>36 KB · Oct 6</span></div></div>
+    <div class="card"><span class="type">JSON</span><h4>lakeside-services-catalog.json</h4><div class="facts">6 records</div><div class="foot"><span class="chip ok">Ready</span><span>1.1 KB · Oct 6</span></div></div>
+    <div class="card"><span class="type">DOCX</span><h4>quarterly-review-draft.docx</h4><div class="facts">Embedding…</div><div class="foot"><span class="chip warn">● Processing</span><span>2.4 MB · just now</span></div></div>
+    <div class="card"><span class="type">PDF</span><h4>scan.pdf</h4><div class="facts" style="color:var(--err)">This PDF has no extractable text. Scanned (image) PDFs aren't supported.</div><div class="foot"><span class="chip err">Failed</span><span>812 KB · Oct 6</span></div></div>
+  </div>
+</main>
+<script>
+  document.querySelectorAll('[data-view]').forEach(a=>a.addEventListener('click',()=>{
+    document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x===a));
+    document.getElementById('view-ask').hidden=a.dataset.view!=='ask';
+    document.getElementById('view-kb').hidden=a.dataset.view!=='kb';window.scrollTo(0,0);
+  }));
+</script>
+</body>
+</html>
